@@ -56,6 +56,10 @@ namespace Assessment2Task2
         public static List<Room> listOfRooms = new List<Room>();
         public static List<RoomAllocation> roomAllocations = new List<RoomAllocation>();
 
+        static string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        static string filePath = Path.Combine(folderPath, "lhms_850005363.txt");
+        static string backupFilePath = Path.Combine(folderPath, "lhms_850005363_backup.txt");
+
         static void Main(string[] args)
         {
             char ans;
@@ -72,6 +76,9 @@ namespace Assessment2Task2
                 Console.WriteLine("4. De-Allocate Rooms");
                 Console.WriteLine("5. Display Room Allocation Details");
                 Console.WriteLine("6. Billing");
+                Console.WriteLine("7. Save the Room Allocations To a File");
+                Console.WriteLine("8. Show the Room Allocations From a File");
+                Console.WriteLine("0. Backup Allocations File");
                 Console.WriteLine("9. Exit");
                 Console.WriteLine("****************************************************************");
                 Console.Write("Enter Your Choice Number Here: ");
@@ -79,30 +86,17 @@ namespace Assessment2Task2
 
                 switch (choice)
                 {
-                    case 1:
-                        AddRooms();
-                        break;
-                    case 2:
-                        DisplayRooms();
-                        break;
-                    case 3:
-                        AllocateRoom();
-                        break;
-                    case 4:
-                        DeallocateRoom();
-                        break;
-                    case 5:
-                        DisplayRoomAllocations();
-                        break;
-                    case 6:
-                        Console.WriteLine("Billing Feature is Under Construction and will be added soon...!!!");
-                        break;
-                    case 9:
-                        Console.WriteLine("Exiting... Thank you!");
-                        break;
-                    default:
-                        Console.WriteLine("Invalid choice.");
-                        break;
+                    case 1: AddRooms(); break;
+                    case 2: DisplayRooms(); break;
+                    case 3: AllocateRoom(); break;
+                    case 4: DeallocateRoom(); break;
+                    case 5: DisplayRoomAllocations(); break;
+                    case 6: Console.WriteLine("Billing Feature is Under Construction and will be added soon...!!!"); break;
+                    case 7: SaveRoomAllocationsToFile(); break;
+                    case 8: ShowRoomAllocationsFromFile(); break;
+                    case 0: BackupAllocations(); break;
+                    case 9: Console.WriteLine("Exiting... Thank you!"); break;
+                    default: Console.WriteLine("Invalid choice."); break;
                 }
 
                 Console.Write("\nWould You Like To Continue(Y/N): ");
@@ -188,5 +182,72 @@ namespace Assessment2Task2
                 Console.WriteLine($"Room No: {ra.RoomNumber}, Customer No: {ra.AllocatedCustomer.CustomerNumber}, Name: {ra.AllocatedCustomer.Name}");
             }
         }
+
+        // Save room allocations to a file
+        static void SaveRoomAllocationsToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(filePath, true))
+                {
+                    writer.WriteLine("----- Room Allocations ----- " + DateTime.Now);
+                    foreach (var allocation in roomAllocations)
+                    {
+                        writer.WriteLine($"Room: {allocation.RoomNumber}, Customer No: {allocation.AllocatedCustomer.CustomerNumber}, Name: {allocation.AllocatedCustomer.Name}");
+                    }
+                    writer.WriteLine("-------------------------------\n");
+                }
+                Console.WriteLine("Room allocations saved to file.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error writing to file: " + ex.Message);
+            }
+        }
+
+        // Show room allocations from the file
+        static void ShowRoomAllocationsFromFile()
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    string content = File.ReadAllText(filePath);
+                    Console.WriteLine("\n----- Data from File -----");
+                    Console.WriteLine(content);
+                }
+                else
+                {
+                    Console.WriteLine("No saved file found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error reading file: " + ex.Message);
+            }
+        }
+
+        // Backup allocations file
+        static void BackupAllocations()
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    File.AppendAllText(backupFilePath, File.ReadAllText(filePath));
+                    File.WriteAllText(filePath, string.Empty);
+                    Console.WriteLine("Backup created and original file cleared.");
+                }
+                else
+                {
+                    Console.WriteLine("Original file not found for backup.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Backup failed: " + ex.Message);
+            }
+        }
     }
 }
+
